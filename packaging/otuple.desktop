@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Name=Otuple
+Comment=Tuple contacts and call controls
+Exec=otuple
+Icon=otuple
+Terminal=false
+Categories=Network;InstantMessaging;
+StartupNotify=false

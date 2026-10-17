@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+set -euo pipefail
+preview=false
+open_menu=1
+case "${1:-}" in
+  --demo) preview=true ;;
+  --background) open_menu=0 ;;
+  --help|-h) printf 'Usage: otuple [--demo | --background]\n'; exit 0 ;;
+  '') ;;
+  *) printf 'Unknown option: %s\n' "$1" >&2; exit 2 ;;
+esac
+if ! omarchy-shell otuple ping >/dev/null 2>&1; then
+  printf 'Otuple is not loaded. Install it with: omarchy plugin add https://github.com/kierangraham/otuple --enable\n' >&2
+  exit 1
+fi
+omarchy-shell otuple setDemo "$preview"
+if (( open_menu )); then omarchy-shell shell summon kierangraham.otuple; fi
