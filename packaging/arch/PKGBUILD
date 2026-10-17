@@ -18,8 +18,7 @@ license=('MIT')
 depends=('bash' 'python')
 makedepends=('make')
 source=("$pkgname-$pkgver.tar.gz::https://github.com/kierangraham/otuple/archive/refs/tags/v$pkgver.tar.gz")
-# Update with the real checksum (updpkgsums) once the v0.1.0 tag is published.
-sha256sums=('SKIP')
+sha256sums=('21f7272bc3bba3b0dfac3c255c3172c89971768b70660291f2a709ecd134f9bc')
 
 package() {
   cd "$pkgname-$pkgver"
