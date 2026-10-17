@@ -1,64 +1,149 @@
 # Otuple
 
-An Omarchy bar widget for the Tuple Linux CLI. Its bar button opens a panel with searchable contacts, presence, favorites, call links, microphone and screen-sharing controls, preferences, and sign-in.
+Otuple puts Tuple in the Omarchy bar. It is for people who pair on [Tuple](https://tuple.app) from an Omarchy desktop. A bar button opens a panel where you can find a contact, start or join a call, and use the call controls. It drives the official Tuple Linux CLI.
 
-![Otuple panel with contacts and call controls](docs/otuple-panel.webp)
+[![Otuple: searching contacts and opening favorites from the Omarchy bar](docs/preview.webp)](https://kierangraham.com/media/promo/otuple.mp4)
+
+[Watch the film (25 s, with sound)](https://kierangraham.com/media/promo/otuple.mp4)
 
 ## Requirements
 
-- Omarchy, with its Quickshell shell and plugin support.
-- The Tuple Linux CLI: the official ARM64 or x86_64 `tuple` executable on `PATH`, from the [Tuple Linux installer](https://tuple.app/linux/). Otuple never downloads or upgrades Tuple.
-- Python 3.
+- **Omarchy**, with its shell plugin support.
+- **The Tuple Linux CLI.** Install it with [Tuple's Linux installer](https://tuple.app/linux/), so that `tuple` is on your `PATH`. Tuple ships it for x86_64 and ARM64. Otuple never downloads or upgrades Tuple.
+- **Python 3.** Install it with `sudo pacman -S --needed python`.
 
 ## Install
+
+**Install the plugin.** This one command adds the bar widget:
 
 ```sh
 omarchy plugin add https://github.com/kierangraham/otuple --enable
 ```
 
-This clones the repository into `~/.config/omarchy/plugins/kierangraham.otuple` and adds the button to the right bar section. To place it just before the tray:
+Omarchy clones the repository into `~/.config/omarchy/plugins/kierangraham.otuple` and adds the button to the right side of the bar.
+
+**Optionally, install the `otuple` launcher.** It adds an `otuple` command, icons, and a desktop entry, so you can open the panel from the app launcher or a key binding. The plugin works without it. Choose one of these, in order of preference:
+
+1. **Arch package.** It installs to `/usr`:
+
+   ```sh
+   git clone https://github.com/kierangraham/otuple
+   cd otuple/packaging/arch
+   makepkg -si
+   ```
+
+2. **`make install`.** From a clone of this repository, it installs to `~/.local`:
+
+   ```sh
+   make install
+   ```
+
+The package and `make install` only install the launcher. Omarchy manages the plugin folder, so the bar widget always comes from `omarchy plugin add`.
+
+## Update
 
 ```sh
-omarchy plugin enable kierangraham.otuple --section right --before omarchy.tray
+omarchy plugin update kierangraham.otuple
 ```
 
-Optionally, add an `otuple` command and desktop launcher under `~/.local` from a checkout of this repository:
+To update the launcher, rebuild the package or run `make install` again from an updated clone.
+
+## Uninstall
 
 ```sh
-make install-launcher
+omarchy plugin remove kierangraham.otuple
 ```
 
-Update with `omarchy plugin update kierangraham.otuple`. Remove with `omarchy plugin remove kierangraham.otuple`, and `make uninstall-launcher` if you installed the launcher.
+To remove the launcher, run `sudo pacman -R otuple` if you installed the package, or `make uninstall` if you used `make install`.
 
 ## Usage
 
-Click the bar button to toggle the panel. Escape or clicking outside closes it. Ctrl+F focuses search, Ctrl+R refreshes, Ctrl+, opens preferences, and Enter in search calls the first available matching contact. With the launcher installed, `otuple` opens the panel and `otuple --background` leaves it closed.
+**Click the bar button to open or close the panel.** Escape or a click outside closes it. The panel has two tabs, **People** and **Favorites**.
 
-![Otuple preferences](docs/otuple-preferences.webp)
+![Otuple panel with contacts and call controls](docs/otuple-panel.webp)
 
-One shared backend serves every monitor. Contacts and preferences refresh every ten seconds. Favorites and actions run the CLI asynchronously and show errors in the panel. "Go offline" stops Tuple and pauses polling; "Go online" resumes it. The button stays visible when offline. Incoming-call prompts and shared-screen windows stay with Tuple. The panel uses Omarchy's own components, so theme changes apply with the rest of the shell.
+| Key | Action |
+| --- | --- |
+| Ctrl+F | Focus search |
+| Enter, in search | Call the first available match |
+| Ctrl+R | Refresh contacts |
+| Ctrl+, | Open preferences |
+| Escape | Close the panel |
+
+**What you can do from the panel:**
+
+- **Call a contact** with the phone button, or star them to add them to **Favorites**.
+- **Join a call** by pasting a Tuple call link and pressing **Join**.
+- **Start a call with my link** to begin a call on your personal link.
+- **Use the call controls**: **Mute**, **Unmute**, **Share**, **Stop share** and **Leave**.
+- **Sign in** under **Account & sign-in**, by pasting the authorization code from Tuple's website.
+- **Go offline** to stop Tuple and pause refreshing. **Go online** starts it again. The bar button stays visible either way.
+
+**Contacts and preferences refresh every ten seconds.** If a Tuple command fails, the panel shows its error. Incoming-call prompts and shared-screen windows still come from Tuple itself.
+
+**With the launcher installed**, `otuple` opens the panel and `otuple --background` switches it to live contacts without opening it. Without the launcher, open the panel with `omarchy-shell shell summon kierangraham.otuple`.
+
+### What it can and cannot show
+
+**Otuple does not claim a call or microphone state it cannot read.** The current Tuple Linux CLI has no JSON output and does not report live call state. So Mute and Unmute are separate buttons, as are Share and Stop share, and none of them shows a current state.
+
+Tuple's [CLI reference](https://docs.tuple.app/cli/commands), labelled macOS, describes a newer interface with JSON output and a `state` command. Otuple switches to that interface if the installed `tuple --help` lists it. Mocked tests cover this path, but no Linux release with that interface has been tested yet.
 
 ## Demo mode
 
-`otuple --demo` shows sample contacts and never runs Tuple. Running `otuple` again switches back to live contacts.
+**Demo mode shows four sample contacts and never runs Tuple.**
 
-## Tuple CLI support
+```sh
+otuple --demo
+```
 
-On 5 October 2026, Tuple's official latest ARM64 release endpoint returned `v2026_09_16.1` (SHA-256 `75d405d416be504b24c66e0f2b801d4511408ca3254a26f9e984874717085008`). That release uses `ls`, `call USER_ID`, `favorite`, `new`, `join`, `mute`, `unmute`, `share`, `unshare`, `end`, `on`, and `off`. It does not expose JSON output or live call state. Otuple parses its contact listing and uses explicit Mute/Unmute and Share/Stop share buttons; it does not claim a call or microphone state it cannot read.
+Without the launcher, run `omarchy-shell otuple setDemo true`. Run `otuple`, or `omarchy-shell otuple setDemo false`, to return to live contacts.
 
-The current [Tuple CLI reference](https://docs.tuple.app/cli/commands), labelled macOS, documents `--format json`, `contacts list`, `state`, and `call start`. Otuple includes an adapter for that interface, selected only if the installed binary's help supports it. Mocked tests cover the adapter, but it has not been verified with a Linux release providing that interface.
+## Configuration
 
-Set `OTUPLE_CLI` in the Omarchy shell's environment to use a different `tuple` binary.
+| Setting | Where | Effect |
+| --- | --- | --- |
+| Bar position | `omarchy plugin enable kierangraham.otuple --section right --before omarchy.tray` | Moves the button, here to just before the tray. |
+| Start calls muted | Panel preferences | Tuple's own setting. Otuple changes it through the CLI. |
+| Screen annotation overlay | Panel preferences | Tuple's own setting. Otuple changes it through the CLI. |
+| `OTUPLE_CLI` | The Omarchy shell's environment | Path to a different `tuple` binary. Default: `tuple`. |
 
-The Python backend (`backend.py`) sends JSON Lines to the plugin service over standard output. Commands arrive on standard input and run as argument arrays without a shell. Authorization codes are passed only to `tuple auth` and never stored by Otuple. Tuple owns account credentials and settings.
+![Otuple preferences](docs/otuple-preferences.webp)
+
+**Otuple stores no account data.** Tuple keeps your credentials and settings. Otuple passes an authorization code only to `tuple auth`.
 
 ## Development
+
+The plugin has two parts:
+
+- **QML in `qml/`.** `Service.qml` runs one backend for every monitor. `Widget.qml` is the bar button and panel.
+- **`backend.py`.** It runs `tuple` commands without a shell and sends JSON Lines back to the service on standard output.
+
+Run the checks:
 
 ```sh
 make check
 ```
 
-This runs the backend tests, shell syntax validation, QML lint, `omarchy plugin validate`, and desktop-entry validation. QML lint checks Omarchy's dynamic font, spacing, and color members against the installed shell source, because their declared `QtObject` type hides those members from the static linter. Tests do not place calls or change account preferences.
+`make check` runs these:
+
+- the backend tests
+- a syntax check of the launcher and the PKGBUILD
+- QML lint against the installed Omarchy shell
+- `omarchy plugin validate`
+- `desktop-file-validate` on the desktop entry
+
+The tests never place calls or change Tuple preferences.
+
+To try local changes in the bar, add your clone as the plugin. If Otuple is already installed, remove it first with `omarchy plugin remove kierangraham.otuple`.
+
+```sh
+omarchy plugin add "$PWD" --enable
+```
+
+`omarchy plugin add` copies your last commit, so commit changes before you add the clone. Run `omarchy plugin update kierangraham.otuple` after each new commit.
+
+`make install` and `make uninstall` honour `PREFIX` (default `~/.local`) and `DESTDIR`.
 
 ## Licence
 

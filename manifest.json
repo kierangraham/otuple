@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "id": "kierangraham.otuple",
   "name": "Otuple",
-  "version": "0.2.0",
+  "version": "0.1.0",
   "author": "Kieran Graham",
   "description": "Tuple contacts and call controls in the Omarchy bar",
   "kinds": ["service", "bar-widget"],

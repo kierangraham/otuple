@@ -1,0 +1,28 @@
+# Maintainer: Kieran Graham <me@kierangraham.com>
+#
+# Installs the optional otuple launcher, its icons and its desktop entry.
+# The bar widget itself is an Omarchy plugin, so Omarchy manages it:
+#   omarchy plugin add https://github.com/kierangraham/otuple --enable
+#
+# Otuple also needs the Tuple Linux CLI (`tuple` on PATH). Tuple ships it
+# through its own installer at https://tuple.app/linux/, not as a pacman
+# package, so it cannot be listed in depends.
+
+pkgname=otuple
+pkgver=0.1.0
+pkgrel=1
+pkgdesc='Launcher for Otuple, an Omarchy bar widget for the Tuple Linux CLI'
+arch=('x86_64' 'aarch64')
+url='https://github.com/kierangraham/otuple'
+license=('MIT')
+depends=('bash' 'python')
+makedepends=('make')
+source=("$pkgname-$pkgver.tar.gz::https://github.com/kierangraham/otuple/archive/refs/tags/v$pkgver.tar.gz")
+# Update with the real checksum (updpkgsums) once the v0.1.0 tag is published.
+sha256sums=('SKIP')
+
+package() {
+  cd "$pkgname-$pkgver"
+  make install DESTDIR="$pkgdir" PREFIX=/usr
+  install -Dm644 LICENSE "$pkgdir/usr/share/licenses/$pkgname/LICENSE"
+}
